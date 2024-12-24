@@ -1,11 +1,11 @@
-#ifndef SHINX_HNSW_INDEX_H_
-#define SHINX_HNSW_INDEX_H_
+#ifndef HNSW_HNSW_INDEX_H_
+#define HNSW_HNSW_INDEX_H_
 
 #include <cstdint>
 #include <memory>
 #include <vector>
 
-namespace shinx {
+namespace hnsw {
 
 // Implementation of the Hierarchical Navigable Small World (HNSW)
 // algorithm based on:
@@ -26,6 +26,8 @@ class HNSWIndex
 
   private:
 
+  uint64_t GenerateLevel();
+
   struct HNSWNode
   {
     std::vector<float> embedding;
@@ -33,15 +35,15 @@ class HNSWIndex
     std::shared_ptr<HNSWNode> skip_link;
   };
 
-  std::shared_ptr<HNSWNode> entry_point_;
-
-  uint32_t highest_level_;
-  uint32_t expansion_factor_construction_;
-  uint32_t level_generation_normalization_factor_;
-  uint32_t established_connections_;
-  uint32_t max_connections_;
+  std::shared_ptr<HNSWNode> entry_point_;       // ep
+  uint64_t highest_level_;                      // L
+  uint64_t expansion_factor_construction_;      // efConstruction
+  uint64_t edges_per_node_;                     // M
+  uint64_t max_edges_per_node_;                 // Mmax
+  uint64_t max_edges_per_node_level_0_;         // Mmax0
+  double normalization_factor_;                 // mL
 };
 
-} // namespace shinx
+} // namespace hnsw
 
-#endif  // SHINX_HNSW_INDEX_H_
+#endif  // HNSW_HNSW_INDEX_H_

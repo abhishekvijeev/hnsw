@@ -72,13 +72,14 @@ int main(int argc, char** argv)
   std::vector<std::vector<float>> sift_query = fvecs_read(sift_query_path);
 
   // Print first base vector
-  // std::copy(sift_base[0].begin(), sift_base[0].end(), std::ostream_iterator<float>(std::cout, " "));
-  // std::cout << std::endl;
+  std::copy(sift_base[0].begin(), sift_base[0].end(), std::ostream_iterator<float>(std::cout, " "));
+  std::cout << std::endl << std::endl;
 
   // Print first groundtruth vector
   // std::copy(sift_groundtruth[0].begin(), sift_groundtruth[0].end(), std::ostream_iterator<float>(std::cout, " "));
   // std::cout << std::endl;
 
-  shinx::HNSWIndex h;
+  hnsw::HNSWIndex h;
+  h.Insert(sift_base[0]);
   return 0;
 }

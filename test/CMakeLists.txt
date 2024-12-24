@@ -9,7 +9,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-include_directories(${PROJECT_SOURCE_DIR}/shinx)
+include_directories(${PROJECT_SOURCE_DIR}/hnsw)
 
 add_executable(
   test_hello
@@ -19,7 +19,7 @@ add_executable(
 target_link_libraries(
   test_hello
   GTest::gtest_main
-  shinx
+  hnsw
 )
 
 include(GoogleTest)
