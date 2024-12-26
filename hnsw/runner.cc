@@ -7,8 +7,7 @@
 #include <string>
 #include <vector>
 
-std::vector<std::vector<float>> fvecs_read(const std::string& file_path)
-{
+std::vector<std::vector<float>> fvecs_read(const std::string& file_path) {
   std::vector<std::vector<float>> data;
   std::ifstream file(file_path, std::ios::binary);
   if (!file) {
@@ -33,8 +32,7 @@ std::vector<std::vector<float>> fvecs_read(const std::string& file_path)
   return data;
 }
 
-std::vector<std::vector<int>> ivecs_read(const std::string& file_path)
-{
+std::vector<std::vector<int>> ivecs_read(const std::string& file_path) {
   std::vector<std::vector<int>> data;
   std::ifstream file(file_path, std::ios::binary);
   if (!file) {
@@ -59,27 +57,31 @@ std::vector<std::vector<int>> ivecs_read(const std::string& file_path)
   return data;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   std::string sift_base_path = "/home/avijeev/sift/sift_base.fvecs";
   std::string sift_groundtruth_path = "/home/avijeev/sift/sift_groundtruth.ivecs";
   std::string sift_learn_path = "/home/avijeev/sift/sift_learn.fvecs";
   std::string sift_query_path = "/home/avijeev/sift/sift_query.fvecs";
 
-  std::vector<std::vector<float>> sift_base = fvecs_read(sift_base_path);
-  std::vector<std::vector<int>> sift_groundtruth = ivecs_read(sift_groundtruth_path);
-  std::vector<std::vector<float>> sift_learn = fvecs_read(sift_learn_path);
-  std::vector<std::vector<float>> sift_query = fvecs_read(sift_query_path);
+  // std::vector<std::vector<float>> sift_base = fvecs_read(sift_base_path);
+  // std::vector<std::vector<int>> sift_groundtruth = ivecs_read(sift_groundtruth_path);
+  // std::vector<std::vector<float>> sift_learn = fvecs_read(sift_learn_path);
+  // std::vector<std::vector<float>> sift_query = fvecs_read(sift_query_path);
 
   // Print first base vector
-  std::copy(sift_base[0].begin(), sift_base[0].end(), std::ostream_iterator<float>(std::cout, " "));
-  std::cout << std::endl << std::endl;
+  // std::copy(sift_base[0].begin(), sift_base[0].end(), std::ostream_iterator<float>(std::cout, " "));
+  // std::cout << std::endl << std::endl;
 
   // Print first groundtruth vector
   // std::copy(sift_groundtruth[0].begin(), sift_groundtruth[0].end(), std::ostream_iterator<float>(std::cout, " "));
   // std::cout << std::endl;
 
   hnsw::HNSWIndex h;
-  h.Insert(sift_base[0]);
+  std::vector<float> v1{1.0, 1.0};
+  std::vector<float> v2{2.0, 2.0};
+  h.Insert(v1);
+  h.Insert(v2);
+  // h.Insert(sift_base[0]);
+  // h.Insert(sift_base[1]);
   return 0;
 }
