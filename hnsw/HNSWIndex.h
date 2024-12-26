@@ -21,8 +21,8 @@ struct HNSWIndex {
 
   /// @brief: A point in multi-dimensional space
   struct Point {
-    uint64_t id;                  // an internal ID that's unique to each point in the index
-    uint64_t level;               // the highest level containing this point
+    int64_t id;                  // an internal ID that's unique to each point in the index
+    int64_t level;               // the highest level containing this point
     std::vector<float> embedding; // the point's vector embedding
 
     float distance(const Point& other) const
@@ -36,7 +36,7 @@ struct HNSWIndex {
   };
 
   struct PointDistCloser {
-    uint64_t id;
+    int64_t id;
     float dist;
 
     bool operator<(const PointDistCloser& other) const {
@@ -45,7 +45,7 @@ struct HNSWIndex {
   };
 
   struct PointDistFarther {
-    uint64_t id;
+    int64_t id;
     float dist;
 
     bool operator<(const PointDistFarther& other) const {
@@ -59,19 +59,17 @@ struct HNSWIndex {
   /// @param MMax: The maximum number of edges that a node in the graph can have at any point in time (default = 16)
   /// @param MMax0: The maximum number of edges that a node at level 0 can have at any point in time (default = 32)
   HNSWIndex(
-    uint64_t ef_construction = 40,
-    uint64_t M = 16,
-    uint64_t MMax = 16,
-    uint64_t MMax0 = 32
-  ):
-    entry_point{0},
-    L{0},
-    ef_construction{ef_construction},
-    M{M},
-    MMax{MMax},
-    MMax0{MMax0},
-    mL{1 / log(M)}
-  {
+    int64_t ef_construction = 40,
+    int64_t M = 16,
+    int64_t MMax = 16,
+    int64_t MMax0 = 32):
+      entry_point{0},
+      L{0},
+      ef_construction{ef_construction},
+      M{M},
+      MMax{MMax},
+      MMax0{MMax0},
+      mL{1 / log(M)} {
     PrintParameters();
   }
 
@@ -84,29 +82,42 @@ struct HNSWIndex {
   /// @param ep:
   /// @param ef:
   /// @param lc:
-  /// @returns std::priority_queue containing the IDs of the closest points
-  std::priority_queue<PointDistFarther> SearchLayer(
+  /// @returns std::vector containing the IDs of the closest points
+  std::vector<int64_t> SearchLayer(
     const Point& q,
-    uint64_t ep,
-    uint64_t ef,
-    uint64_t lc
-  );
+    int64_t ep,
+    int64_t ef,
+    int64_t lc);
 
-  void SelectNeighbours();
+  /// @brief Select 'M' neighbours
+  /// @param q:
+  /// @param W:
+  /// @param M:
+  /// @param lc:
+  /// @param extend_candidates:
+  /// @param keep_pruned_connections:
+  /// @returns 
+  std::vector<int64_t> SelectNeighbours(
+    const Point& q,
+    const std::vector<int64_t>& C,
+    int64_t M,
+    int64_t lc);
+
+
   void KNNSearch();
   void PrintParameters();
-  uint64_t GenerateLevel();
+  int64_t GenerateLevel();
 
-  uint64_t entry_point;
-  uint64_t L;
-  uint64_t ef_construction;
-  uint64_t M;
-  uint64_t MMax;
-  uint64_t MMax0;
+  int64_t entry_point;
+  int64_t L;
+  int64_t ef_construction;
+  int64_t M;
+  int64_t MMax;
+  int64_t MMax0;
   double mL;
 
   std::vector<Point> points;
-  std::vector<std::vector<std::vector<uint64_t>>> graph;  // the graph consists of levels; each level contains points; each point has multiple neighbours
+  std::vector<std::unordered_map<int64_t, std::vector<int64_t>>> graph;  // the graph consists of levels; each level contains points; each point has multiple neighbours
 };
 
 } // namespace hnsw
