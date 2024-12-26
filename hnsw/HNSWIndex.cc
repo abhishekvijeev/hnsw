@@ -81,7 +81,30 @@ void HNSWIndex::Insert(const std::vector<float>& embedding) {
   for (int64_t lc = std::min(L, point_level); lc >= 0; lc--) {
     std::vector<int64_t> W = SearchLayer(q, ep, ef_construction, lc);
     std::vector<int64_t> neighbours = SelectNeighbours(q, W, M, lc);
+
+    /// Add bidirectional connections between 'q' and all nodes in
+    /// 'neighbours' at layer 'lc'
+    graph[lc][point_id] = neighbours;
+    for (int64_t neighbour : neighbours) {
+      graph[lc][neighbour].push_back(point_id);
+    }
+
+    /// Now that additional edges have been added to the nodes in
+    /// 'neighbours', we need to ensure that the total number of edges
+    /// for each node in 'neighbours' doesn't exceed 'MMax'
+    for (int64_t e : neighbours) {
+      const std::vector<int64_t>& e_conn = graph[lc][e];
+      int64_t max_edges = (lc == 0 ? MMax : MMax0);
+      if (e_conn.size() > max_edges) {
+        std::vector<int64_t> e_new_conn = SelectNeighbours(points[e], e_conn, max_edges, lc);
+        graph[lc][e] = e_new_conn;
+      }
+    }
+    ep = W[W.size() - 1];
   }
+
+  if (point_level > L)
+    entry_point = point_id;
 
   std::cout << std::endl;
 }
