@@ -30,9 +30,9 @@ int64_t HNSWIndex::GenerateLevel() {
   return std::floor(-1 * log(dist(gen)) * mL);
 }
 
-void HNSWIndex::Insert(const std::vector<float>& embedding) {
+void HNSWIndex::Insert(const std::vector<float>& q_embedding) {
   std::cout << "HNSWIndex::Insert(";
-  std::copy(embedding.begin(), embedding.end(), std::ostream_iterator<float>(std::cout, ","));
+  std::copy(q_embedding.begin(), q_embedding.end(), std::ostream_iterator<float>(std::cout, ","));
   std::cout << ")" << std::endl;
 
   int64_t point_id = points.size();
@@ -48,7 +48,7 @@ void HNSWIndex::Insert(const std::vector<float>& embedding) {
     case 4: point_level = 1; break;
   }
 
-  Point q{point_id, point_level, embedding};
+  Point q{point_id, point_level, q_embedding};
   points.push_back(q);
 
   /// If necessary, add more levels to the graph
@@ -233,4 +233,28 @@ std::vector<int64_t> HNSWIndex::SelectNeighbours(
     }
   }
   return R;
+}
+
+std::vector<std::vector<float>> HNSWIndex::KNNSearch(
+  const std::vector<float>& q_embedding,
+  int64_t K,
+  int64_t ef) {
+
+  Point q{-1, -1, q_embedding};
+  std::vector<int64_t> W;
+  int64_t ep = entry_point;
+  for (int64_t lc = L; lc >= 1; lc--) {
+    W = SearchLayer(q, ep, 1, lc);
+    ep = W[W.size() - 1];
+  }
+  W = SearchLayer(q, ep, ef, 0);
+
+  std::vector<std::vector<float>> ret;
+  for (int64_t i = 0; i < K && i < W.size(); i++) {
+    int64_t neighbour_id = W[W.size() - 1 - i];
+    std::vector<float> neighbour_embedding = points[neighbour_id].embedding;
+    ret.push_back(neighbour_embedding);
+
+  }
+  return ret;
 }

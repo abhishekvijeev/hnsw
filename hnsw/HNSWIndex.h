@@ -74,8 +74,8 @@ struct HNSWIndex {
   }
 
   /// @brief Insert a new point into the HNSW index
-  /// @param embedding: The point's vector embedding
-  void Insert(const std::vector<float>& embedding);
+  /// @param q_embedding: The point's vector embedding
+  void Insert(const std::vector<float>& q_embedding);
 
   /// @brief Searches for 'ef' points closest to 'q' at layer 'lc', beginning from node 'ep'
   /// @param q:
@@ -103,8 +103,18 @@ struct HNSWIndex {
     int64_t M,
     int64_t lc);
 
+  /// @brief Search for the 'K' nearest neighbours to query whose
+  /// embedding is given by 'q_embedding'
+  /// @param q_embedding:
+  /// @param K:
+  /// @param ef:
+  /// @returns std::vector containing the 'K' nearest neighbours'
+  /// embeddings
+  std::vector<std::vector<float>> KNNSearch(
+    const std::vector<float>& q_embedding,
+    int64_t K,
+    int64_t ef = 40);
 
-  void KNNSearch();
   void PrintParameters();
   int64_t GenerateLevel();
 
