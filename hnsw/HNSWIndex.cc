@@ -36,7 +36,18 @@ void HNSWIndex::Insert(const std::vector<float>& embedding) {
   std::cout << ")" << std::endl;
 
   int64_t point_id = points.size();
-  int64_t point_level = GenerateLevel();
+  // int64_t point_level = GenerateLevel();
+
+  int64_t point_level;
+
+  switch(point_id) {
+    case 0: point_level = 0; break;
+    case 1: point_level = 0; break;
+    case 2: point_level = 0; break;
+    case 3: point_level = 1; break;
+    case 4: point_level = 1; break;
+  }
+
   Point q{point_id, point_level, embedding};
   points.push_back(q);
 
@@ -62,6 +73,10 @@ void HNSWIndex::Insert(const std::vector<float>& embedding) {
     return;
   }
 
+  std::cout << "Point ID: " << point_id << "\n";
+  std::cout << "Point level: " << point_level << "\n";
+  std::cout << "L: " << L << "\n";
+
   /// Phase 1
   ///
   /// Traverse the graph starting from the top layer to find the
@@ -80,7 +95,16 @@ void HNSWIndex::Insert(const std::vector<float>& embedding) {
 
   for (int64_t lc = std::min(L, point_level); lc >= 0; lc--) {
     std::vector<int64_t> W = SearchLayer(q, ep, ef_construction, lc);
+
+    std::cout << "Node " << point_id << "'s neighbour candidates at level " << lc << ": ";
+    std::copy(W.begin(), W.end(), std::ostream_iterator<float>(std::cout, ","));
+    std::cout << std::endl;
+
     std::vector<int64_t> neighbours = SelectNeighbours(q, W, M, lc);
+
+    std::cout << "Node " << point_id << "'s neighbours at level " << lc << ": ";
+    std::copy(neighbours.begin(), neighbours.end(), std::ostream_iterator<float>(std::cout, ","));
+    std::cout << std::endl;
 
     /// Add bidirectional connections between 'q' and all nodes in
     /// 'neighbours' at layer 'lc'
@@ -94,19 +118,21 @@ void HNSWIndex::Insert(const std::vector<float>& embedding) {
     /// for each node in 'neighbours' doesn't exceed 'MMax'
     for (int64_t e : neighbours) {
       const std::vector<int64_t>& e_conn = graph[lc][e];
-      int64_t max_edges = (lc == 0 ? MMax : MMax0);
+      int64_t max_edges = (lc == 0 ? MMax0 : MMax);
       if (e_conn.size() > max_edges) {
         std::vector<int64_t> e_new_conn = SelectNeighbours(points[e], e_conn, max_edges, lc);
         graph[lc][e] = e_new_conn;
       }
     }
-    ep = W[W.size() - 1];
+    ep = W[W.size() - 1]; // W[0] contains the farthest node, W[W.size() - 1] contains the nearest node
   }
 
-  if (point_level > L)
+  if (point_level > L) {
+    L = point_level;
     entry_point = point_id;
+  }
 
-  std::cout << std::endl;
+  std::cout << std::endl << std::endl;
 }
 
 std::vector<int64_t> HNSWIndex::SearchLayer(
@@ -115,7 +141,7 @@ std::vector<int64_t> HNSWIndex::SearchLayer(
   int64_t ef,
   int64_t lc) {
 
-  std::cout << "SearchLayer\n";
+  std::cout << "SearchLayer " << lc << ", ep: " << ep << "\n";
   std::unordered_set<int64_t> v;
   std::priority_queue<HNSWIndex::PointDistCloser> C;
   std::priority_queue<HNSWIndex::PointDistFarther> W;
@@ -158,6 +184,7 @@ std::vector<int64_t> HNSWIndex::SelectNeighbours(
   int64_t M,
   int64_t lc) {
 
+  std::cout << "SelectNeighbours level: " << lc << "\n";
   std::vector<int64_t> R;
   std::priority_queue<HNSWIndex::PointDistCloser> W;
   for (int64_t c : C) {
@@ -167,12 +194,24 @@ std::vector<int64_t> HNSWIndex::SelectNeighbours(
   while ((W.size() > 0) && (R.size() < M)) {
     int64_t e = W.top().id; W.pop();
     if (R.size() == 0) {
+      std::cout << "\tchoosing closest e: ";
+      std::copy(points[e].embedding.begin(), points[e].embedding.end(), std::ostream_iterator<float>(std::cout, ","));
+      std::cout << std::endl << std::endl;
       R.push_back(e);
     }
     else {
+      std::cout << "\tnext e: ";
+      std::copy(points[e].embedding.begin(), points[e].embedding.end(), std::ostream_iterator<float>(std::cout, ","));
       // If 'e' is closer to any 'r' than it is to 'q', prune 'e'
       bool prune_e = false;
       for (int64_t r : R) {
+        std::cout << ", r: ";
+        std::copy(points[r].embedding.begin(), points[r].embedding.end(), std::ostream_iterator<float>(std::cout, ","));
+        std::cout << ", q: ";
+        std::copy(q.embedding.begin(), q.embedding.end(), std::ostream_iterator<float>(std::cout, ","));
+        std::cout << std::endl;
+        std::cout << "\tdist(e, r): " << points[e].distance(points[r]) << std::endl;
+        std::cout << "\tdist(e, q): " << points[e].distance(q) << std::endl;
         if (points[e].distance(points[r]) < points[e].distance(q)) {
           prune_e = true;
           break;
@@ -180,8 +219,17 @@ std::vector<int64_t> HNSWIndex::SelectNeighbours(
       }
 
       if (!prune_e) {
+        std::cout << "\tchoosing ";
+        std::copy(points[e].embedding.begin(), points[e].embedding.end(), std::ostream_iterator<float>(std::cout, ","));
+        std::cout << std::endl;
         R.push_back(e);
       }
+      else {
+        std::cout << "\tpruning ";
+        std::copy(points[e].embedding.begin(), points[e].embedding.end(), std::ostream_iterator<float>(std::cout, ","));
+        std::cout << std::endl;
+      }
+      std::cout << std::endl;
     }
   }
   return R;

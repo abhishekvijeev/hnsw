@@ -77,10 +77,16 @@ int main(int argc, char** argv) {
   // std::cout << std::endl;
 
   hnsw::HNSWIndex h;
-  std::vector<float> v1{1.0, 1.0};
-  std::vector<float> v2{2.0, 2.0};
-  h.Insert(v1);
-  h.Insert(v2);
+  std::vector<float> p0{1.0, 1.0};
+  std::vector<float> p1{2.0, 2.0};
+  std::vector<float> p2{4.0, 0.0};
+  std::vector<float> p3{0.0, 10.0};
+  std::vector<float> p4{3.0, 6.0};
+  h.Insert(p0);
+  h.Insert(p1);
+  h.Insert(p2);
+  h.Insert(p3);
+  h.Insert(p4);
   // h.Insert(sift_base[0]);
   // h.Insert(sift_base[1]);
   return 0;
