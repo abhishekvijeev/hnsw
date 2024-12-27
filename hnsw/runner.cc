@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
   h.Insert(p4);
 
   std::vector<float> q{3, 3};
-  std::vector<std::vector<float>> knn = h.KNNSearch(q, 10);
+  std::vector<std::vector<float>> knn = h.KNNSearch(q, 2);
   std::cout << "Nearest neighbours:" << std::endl;
   for (auto& point : knn) {
     std::copy(point.begin(), point.end(), std::ostream_iterator<float>(std::cout, " "));

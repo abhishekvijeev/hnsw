@@ -70,7 +70,7 @@ struct HNSWIndex {
       MMax{MMax},
       MMax0{MMax0},
       mL{1 / log(M)} {
-    // PrintParameters();
+    PrintParameters();
   }
 
   /// @brief Insert a new point into the HNSW index
