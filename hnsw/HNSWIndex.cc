@@ -272,7 +272,7 @@ std::vector<int64_t> HNSWIndex::SelectNeighbours(
   return R;
 }
 
-std::vector<std::vector<float>> HNSWIndex::KNNSearch(
+std::vector<std::pair<int64_t, std::vector<float>>> HNSWIndex::KNNSearch(
   const std::vector<float>& q_embedding,
   int64_t K,
   int64_t ef) {
@@ -286,11 +286,11 @@ std::vector<std::vector<float>> HNSWIndex::KNNSearch(
   }
   W = SearchLayer(q, ep, ef, 0);
 
-  std::vector<std::vector<float>> ret;
+  std::vector<std::pair<int64_t, std::vector<float>>> ret;
   for (int64_t i = 0; i < K && i < W.size(); i++) {
     int64_t neighbour_id = W[W.size() - 1 - i];
     std::vector<float> neighbour_embedding = points[neighbour_id].embedding;
-    ret.push_back(neighbour_embedding);
+    ret.push_back(std::make_pair(neighbour_id, neighbour_embedding));
 
   }
   return ret;

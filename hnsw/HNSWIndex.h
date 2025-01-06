@@ -108,9 +108,8 @@ struct HNSWIndex {
   /// @param q_embedding:
   /// @param K:
   /// @param ef:
-  /// @returns std::vector containing the 'K' nearest neighbours'
-  /// embeddings
-  std::vector<std::vector<float>> KNNSearch(
+  /// @returns std::vector containing the 'K' nearest neighbours
+  std::vector<std::pair<int64_t, std::vector<float>>> KNNSearch(
     const std::vector<float>& q_embedding,
     int64_t K,
     int64_t ef = 40);
